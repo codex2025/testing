@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
-from db_operations import init_db, insert_request
+from db_operations import init_db, insert_initial_request, update_request_with_ai_results
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
@@ -15,24 +15,34 @@ def index():
 @app.route('/submit_request', methods=['POST'])
 def submit_request():
     if not request.is_json:
-        return jsonify({'error': 'Request must be JSON'}), 400
+        return jsonify({'status': 'error', 'message': 'Request must be JSON'}), 400
 
     data = request.get_json()
-    subject = data.get('subject', '').strip()
-    description = data.get('description', '').strip()
+    subject = data.get('subject')
+    description = data.get('description')
 
-    # Simple server-side logging for now
-    print('Received support request:')
-    print('Subject:', subject)
-    print('Description:', description)
+    print('Received support request (raw):', data)
 
+    # Insert validated request into DB
+    ok, result = insert_initial_request(subject, description)
+    if not ok:
+        return jsonify({'status': 'error', 'message': result}), 400
+
+    request_id = result
+
+    # Simulate AI processing (placeholder)
     try:
-        inserted_id = insert_request(subject, description)
-        print(f"Stored request id={inserted_id}")
-    except Exception as e:
-        print(f"Failed to store request: {e}")
+        # Very small simulated analysis
+        summary = (description or '')[:120] + '...'
+        suggested = f"Thanks for your request about '{subject}'. We'll follow up shortly."
 
-    return jsonify({'status': 'received'})
+        upd_ok, upd_result = update_request_with_ai_results(request_id, summary=summary, suggested_response=suggested, agent_resolved=False, status='Analyzed')
+        if not upd_ok:
+            print('AI update failed:', upd_result)
+    except Exception as e:
+        print('AI simulation/update error:', e)
+
+    return jsonify({'status': 'success', 'message': 'Request received', 'request_id': request_id}), 200
 
 
 if __name__ == '__main__':

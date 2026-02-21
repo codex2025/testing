@@ -111,3 +111,99 @@ def insert_request(subject: str, description: str, *, category: str = None,
     finally:
         conn.close()
 
+
+def insert_initial_request(subject: str, description: str, *, db_path: str = DB_PATH):
+    """Validate, sanitize and insert a new support request.
+
+    Returns (True, request_id) on success or (False, error_message) on failure.
+    """
+    # Basic validation
+    if not isinstance(subject, str) or not isinstance(description, str):
+        return False, 'Subject and description must be strings.'
+
+    subject_clean = subject.strip()
+    description_clean = description.strip()
+
+    if not subject_clean:
+        return False, 'Subject is required.'
+    if not description_clean:
+        return False, 'Description is required.'
+    if len(subject_clean) < 5 or len(subject_clean) > 100:
+        return False, 'Subject must be between 5 and 100 characters.'
+    if len(description_clean) < 20 or len(description_clean) > 1000:
+        return False, 'Description must be between 20 and 1000 characters.'
+
+    # Perform insertion with parameterized query
+    try:
+        conn = get_db_connection(db_path)
+        cur = conn.cursor()
+        timestamp = datetime.datetime.now().isoformat()
+        cur.execute(
+            """
+            INSERT INTO requests (subject, description, category, summary, suggested_response, agent_resolved, timestamp, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                subject_clean,
+                description_clean,
+                'Uncategorized',
+                'AI Analyzing...',
+                'Pending AI analysis',
+                0,
+                timestamp,
+                'New',
+            ),
+        )
+        conn.commit()
+        request_id = cur.lastrowid
+        print(f"insert_initial_request: inserted id={request_id}")
+        return True, request_id
+    except sqlite3.Error as e:
+        print(f"insert_initial_request error: {e}")
+        return False, f"Database error: {e}"
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
+
+def update_request_with_ai_results(request_id: int, summary: str = None, suggested_response: str = None,
+                                   agent_resolved: bool = False, status: str = 'Analyzed',
+                                   db_path: str = DB_PATH):
+    """Update a request record with AI analysis results.
+
+    Returns (True, rows_updated) on success or (False, error_message) on failure.
+    """
+    if not isinstance(request_id, int) or request_id <= 0:
+        return False, 'Invalid request_id.'
+
+    try:
+        conn = get_db_connection(db_path)
+        cur = conn.cursor()
+        cur.execute(
+            """
+            UPDATE requests
+            SET summary = COALESCE(?, summary),
+                suggested_response = COALESCE(?, suggested_response),
+                agent_resolved = ?,
+                status = ?
+            WHERE id = ?
+            """,
+            (summary, suggested_response, int(bool(agent_resolved)), status, request_id),
+        )
+        conn.commit()
+        rows = cur.rowcount
+        print(f"update_request_with_ai_results: request_id={request_id}, rows_updated={rows}")
+        if rows == 0:
+            return False, 'No matching request found.'
+        return True, rows
+    except sqlite3.Error as e:
+        print(f"update_request_with_ai_results error: {e}")
+        return False, f"Database error: {e}"
+    finally:
+        try:
+            conn.close()
+        except Exception:
+            pass
+
