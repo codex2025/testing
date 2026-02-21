@@ -55,3 +55,37 @@ h1 { text-align: center; margin-bottom: 24px; }
 }
 
 .support-form button:hover { background: #095bb5; }
+
+/* Validation styles */
+.error-message {
+  color: #b00020;
+  font-size: 13px;
+  margin-top: 6px;
+  min-height: 18px;
+}
+
+.is-invalid {
+  border-color: #b00020 !important;
+  box-shadow: 0 0 0 3px rgba(176,0,32,0.06);
+}
+
+.char-count {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.success-message {
+  background: #e6ffed;
+  color: #08512a;
+  border: 1px solid #b7f0c8;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}

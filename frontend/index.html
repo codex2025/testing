@@ -10,15 +10,30 @@
   <main class="container">
     <h1>Submit Your Support Request</h1>
 
-    <form class="support-form" action="#" method="post">
-      <label for="subject">Subject</label>
-      <input type="text" id="subject" name="subject" required>
+    <div id="form-success" class="success-message" role="status" aria-live="polite" hidden></div>
 
-      <label for="description">Description</label>
-      <textarea id="description" name="description" rows="6" required></textarea>
+    <form class="support-form" action="#" method="post" novalidate>
+      <div class="form-group">
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" name="subject" aria-describedby="subject-error subject-count" aria-invalid="false" required>
+        <div class="meta-row">
+          <div id="subject-error" class="error-message" role="alert" aria-live="assertive"></div>
+          <div id="subject-count" class="char-count" aria-hidden="true">0 / 100</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="6" aria-describedby="description-error description-count" aria-invalid="false" required></textarea>
+        <div class="meta-row">
+          <div id="description-error" class="error-message" role="alert" aria-live="assertive"></div>
+          <div id="description-count" class="char-count" aria-hidden="true">0 / 1000</div>
+        </div>
+      </div>
 
       <button type="submit">Submit</button>
     </form>
   </main>
+  <script src="script.js" defer></script>
 </body>
 </html>
