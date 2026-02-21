@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
+from db_operations import init_db, insert_request
+
 app = Flask(__name__, static_folder='static', template_folder='templates')
 CORS(app)
 
@@ -24,8 +26,18 @@ def submit_request():
     print('Subject:', subject)
     print('Description:', description)
 
+    try:
+        inserted_id = insert_request(subject, description)
+        print(f"Stored request id={inserted_id}")
+    except Exception as e:
+        print(f"Failed to store request: {e}")
+
     return jsonify({'status': 'received'})
 
 
 if __name__ == '__main__':
+    try:
+        init_db()
+    except Exception as e:
+        print('Database initialization failed:', e)
     app.run(port=5000, debug=True)
