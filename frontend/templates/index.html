@@ -3,10 +3,38 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Frontend Index</title>
+  <title>VelsyMedia Support Request (Frontend)</title>
+  <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
-  <h1>Frontend Index</h1>
-  <script src="/static/script.js"></script>
+  <main class="container">
+    <h1>Submit Your Support Request</h1>
+
+    <div id="form-success" class="success-message" role="status" aria-live="polite" hidden></div>
+    <div id="form-error" class="error-message" role="alert" aria-live="assertive" hidden></div>
+
+    <form class="support-form" action="#" method="post" novalidate>
+      <div class="form-group">
+        <label for="subject">Subject</label>
+        <input type="text" id="subject" name="subject" aria-describedby="subject-error subject-count" aria-invalid="false" required>
+        <div class="meta-row">
+          <div id="subject-error" class="error-message" role="alert" aria-live="assertive"></div>
+          <div id="subject-count" class="char-count" aria-hidden="true">0 / 100</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="6" aria-describedby="description-error description-count" aria-invalid="false" required></textarea>
+        <div class="meta-row">
+          <div id="description-error" class="error-message" role="alert" aria-live="assertive"></div>
+          <div id="description-count" class="char-count" aria-hidden="true">0 / 1000</div>
+        </div>
+      </div>
+
+      <button type="submit" id="submit-btn">Submit</button>
+    </form>
+  </main>
+  <script src="../static/script.js" defer></script>
 </body>
 </html>
